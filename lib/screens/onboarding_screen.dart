@@ -21,13 +21,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<Map<String, dynamic>> _slides = [
     {
       'title': 'Proteção & Privacidade',
-      'description': 'O jota ajuda a eliminar automaticamente o histórico de chamadas e mensagens SMS dos contactos que adicionar à sua lista de filtros.',
+      'description': 'O Jotta ajuda a eliminar automaticamente o histórico de chamadas e mensagens SMS dos contactos que adicionar à sua lista de filtros.',
       'icon': Icons.shield,
       'color': AppColors.primaryPurple,
     },
     {
       'title': 'Cofre Temporário',
-      'description': 'Antes de apagar os registos do telemóvel, o jota guarda uma cópia de segurança no seu Cofre interno, permitindo-lhe rever ou apagar definitivamente quando quiser.',
+      'description': 'Antes de apagar os registos do telemóvel, o Jotta guarda uma cópia de segurança no seu Cofre interno, permitindo-lhe rever ou apagar definitivamente quando quiser.',
       'icon': Icons.inventory_2,
       'color': AppColors.primaryPurple,
     },

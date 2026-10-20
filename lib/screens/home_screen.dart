@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         builder: (ctx) => AlertDialog(
           backgroundColor: AppColors.background,
           title: const Text('Permissão Necessária'),
-          content: const Text('Para apagar as mensagens privadas, o Jota precisa ser definido temporariamente como a app de SMS padrão. Depois da limpeza, a sua aplicação original será reaberta para restaurar.'),
+          content: const Text('Para apagar as mensagens privadas, o Jotta precisa ser definido temporariamente como a app de SMS padrão. Depois da limpeza, a sua aplicação original será reaberta para restaurar.'),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
             TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Definir e Limpar', style: TextStyle(fontWeight: FontWeight.bold))),
@@ -159,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('jota'),
+        title: const Text('Jotta', style: TextStyle(letterSpacing: 1.2)),
         actions: [
           IconButton(
             icon: const Icon(Icons.analytics_outlined),

@@ -203,7 +203,7 @@ class CleanupWorker(
         } catch (e: Exception) {
             Log.e("CleanupWorker", "Error processing SMS", e)
         }
-        return android.util.Pair(deletedCount, hasPending)
+        return Pair(deletedCount, hasPending)
     }
 
     private fun isDefaultSmsApp(context: Context): Boolean {

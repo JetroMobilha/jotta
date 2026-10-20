@@ -46,7 +46,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           const Text(
-            'Para que o Jota consiga apagar as informações de forma automática, necessita de conceder os seguintes acessos:',
+            'Para que o Jotta consiga apagar as informações de forma automática, necessita de conceder os seguintes acessos:',
             style: TextStyle(fontSize: 16, color: AppColors.textWhite, height: 1.4),
           ),
           const SizedBox(height: 25),

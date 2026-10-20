@@ -113,7 +113,7 @@ class _StatusScreenState extends State<StatusScreen> {
                             ),
                             SizedBox(height: 12),
                             Text(
-                              'O jota executa rotinas de manutenção em segundo plano para manter o sistema limpo e rápido.',
+                              'O Jotta executa rotinas de manutenção em segundo plano para manter o sistema limpo e rápido.',
                               style: TextStyle(color: AppColors.textWhite, height: 1.4),
                             ),
                             SizedBox(height: 8),
