@@ -115,6 +115,7 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
   }
 
   IconData _getIconForType(String type) {
+    if (type == 'call_blocked') return Icons.block;
     if (type.contains('sms')) return Icons.message;
     if (type == 'call_missed') return Icons.call_missed;
     if (type == 'call_out') return Icons.call_made;
@@ -122,6 +123,7 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
   }
 
   Color _getColorForType(String type) {
+    if (type == 'call_blocked') return Colors.redAccent;
     if (type.contains('sms')) return AppColors.primaryPurple;
     if (type == 'call_missed') return Colors.redAccent;
     return AppColors.primaryPurple;
@@ -221,6 +223,13 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
                                 ),
                                 children: items.map((item) {
                                   final isCall = item.type.contains('call');
+                                  String itemTitle = 'Pacote de Texto';
+                                  if (item.type == 'call_blocked') {
+                                    itemTitle = 'Chamada Bloqueada na Fonte';
+                                  } else if (isCall) {
+                                    itemTitle = 'Registo de Chamada';
+                                  }
+
                                   return Padding(
                                     padding: const EdgeInsets.only(left: 20, right: 20, bottom: 15),
                                     child: Container(
@@ -247,7 +256,7 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
                                                   children: [
                                                     Expanded(
                                                       child: Text(
-                                                        isCall ? 'Registo de Chamada' : 'Pacote de Texto',
+                                                        itemTitle,
                                                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textWhite),
                                                       ),
                                                     ),
@@ -257,7 +266,7 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
                                                     ),
                                                   ],
                                                 ),
-                                                if (!isCall) ...[
+                                                if (item.content.isNotEmpty) ...[
                                                   const SizedBox(height: 5),
                                                   Text(
                                                     item.content,

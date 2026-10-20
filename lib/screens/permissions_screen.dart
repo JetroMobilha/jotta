@@ -17,6 +17,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
   bool _hasContacts = false;
   bool _isDefaultSms = false;
   bool _hasNotification = false;
+  bool _hasCallScreening = false;
 
   @override
   void initState() {
@@ -29,12 +30,14 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     final hasContacts = await Permission.contacts.isGranted;
     final isDefaultSms = await NativeCleanerService.isDefaultSmsApp();
     final hasNotif = await Permission.notification.isGranted;
+    final hasCallScreen = await NativeCleanerService.hasCallScreeningRole();
 
     setState(() {
       _hasCallLog = hasCallLog;
       _hasContacts = hasContacts;
       _isDefaultSms = isDefaultSms;
       _hasNotification = hasNotif;
+      _hasCallScreening = hasCallScreen;
     });
   }
 
@@ -139,6 +142,30 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         _checkPermissions();
                       },
                       child: const Text('Conceder', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 15),
+          SoftContainer(
+            padding: const EdgeInsets.all(10),
+            child: ListTile(
+              leading: Icon(Icons.block, color: _hasCallScreening ? AppColors.accentGreen : Colors.redAccent),
+              title: const Text('Filtro de Interceção', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+              subtitle: Text(_hasCallScreening ? 'Escudo Ativo' : 'Rejeitar chamadas indesejadas.', style: const TextStyle(color: AppColors.textLight)),
+              trailing: _hasCallScreening
+                  ? const Icon(Icons.check_circle, color: AppColors.accentGreen, size: 28)
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryPurple,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () async {
+                        await NativeCleanerService.requestCallScreeningRole();
+                        await Future.delayed(const Duration(seconds: 2));
+                        _checkPermissions();
+                      },
+                      child: const Text('Ativar', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
             ),
           ),

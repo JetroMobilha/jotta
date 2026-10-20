@@ -51,6 +51,15 @@ class StorageService {
     await saveContacts(contacts);
   }
 
+  Future<void> updateContact(TargetContact updatedContact) async {
+    final contacts = await getContacts();
+    final index = contacts.indexWhere((c) => c.id == updatedContact.id);
+    if (index != -1) {
+      contacts[index] = updatedContact;
+      await saveContacts(contacts);
+    }
+  }
+
   Future<void> saveSchedule(ScheduleConfig config) async {
     final prefs = await SharedPreferences.getInstance();
     final String data = jsonEncode(config.toJson());

@@ -14,6 +14,24 @@ class NativeCleanerService {
     }
   }
 
+  static Future<bool> hasCallScreeningRole() async {
+    try {
+      final result = await _channel.invokeMethod<bool>('hasCallScreeningRole');
+      return result ?? false;
+    } on PlatformException catch (_) {
+      return false;
+    }
+  }
+
+  static Future<bool> requestCallScreeningRole() async {
+    try {
+      final result = await _channel.invokeMethod<bool>('requestCallScreeningRole');
+      return result ?? false;
+    } on PlatformException catch (_) {
+      return false;
+    }
+  }
+
   static Future<bool> hasCallLogPermission() async {
     try {
       final bool hasPerm = await _channel.invokeMethod('hasCallLogPermission');

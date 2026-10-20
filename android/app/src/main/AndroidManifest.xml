@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:label="jota"
+        android:label="Jotta"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -101,6 +101,24 @@
                 <data android:scheme="mmsto" />
             </intent-filter>
         </service>
+
+        <!-- Call Screening Service (Anti-Spam) -->
+        <service
+            android:name=".JotaCallScreeningService"
+            android:permission="android.permission.BIND_SCREENING_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.telecom.CallScreeningService" />
+            </intent-filter>
+        </service>
+
+        <!-- Boot Receiver for Auto-Rescheduling tasks after reboot -->
+        <receiver android:name=".BootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
     </application>
     <!-- Required to query activities that can process text, see:

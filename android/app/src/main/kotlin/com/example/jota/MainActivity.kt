@@ -26,6 +26,7 @@ import android.view.WindowManager
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.example.jota/privacy_cleaner"
     private val ROLE_REQUEST_CODE = 1001
+    private val CALL_SCREENING_ROLE_REQUEST_CODE = 1002
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +44,13 @@ class MainActivity: FlutterActivity() {
                 }
                 "isDefaultSmsApp" -> {
                     result.success(isDefaultSmsApp())
+                }
+                "hasCallScreeningRole" -> {
+                    result.success(hasCallScreeningRole())
+                }
+                "requestCallScreeningRole" -> {
+                    requestCallScreeningRole()
+                    result.success(true)
                 }
                 "hasCallLogPermission" -> {
                     result.success(hasCallLogPermission())
@@ -84,7 +92,7 @@ class MainActivity: FlutterActivity() {
 
                     if (callLogEnabled) {
                         val input = Data.Builder().putString("taskType", "calls").build()
-                        val callRequest = androidx.work.PeriodicWorkRequest.Builder(CleanupWorker::class.java, callLogInterval, java.util.concurrent.TimeUnit.MINUTES)
+                        val callRequest = androidx.work.PeriodicWorkRequest.Builder(CallCleanupWorker::class.java, callLogInterval, java.util.concurrent.TimeUnit.MINUTES)
                             .setInputData(input)
                             .build()
                         workManager.enqueueUniquePeriodicWork("cleaner_calls", ExistingPeriodicWorkPolicy.REPLACE, callRequest)
@@ -97,7 +105,7 @@ class MainActivity: FlutterActivity() {
                             .putString("taskType", "sms")
                             .putBoolean("smsReminderEnabled", smsReminderEnabled)
                             .build()
-                        val smsRequest = androidx.work.PeriodicWorkRequest.Builder(CleanupWorker::class.java, smsInterval, java.util.concurrent.TimeUnit.MINUTES)
+                        val smsRequest = androidx.work.PeriodicWorkRequest.Builder(SmsCleanupWorker::class.java, smsInterval, java.util.concurrent.TimeUnit.MINUTES)
                             .setInputData(input)
                             .build()
                         workManager.enqueueUniquePeriodicWork("cleaner_sms", ExistingPeriodicWorkPolicy.REPLACE, smsRequest)
@@ -196,6 +204,24 @@ class MainActivity: FlutterActivity() {
             val intent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
             intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
             startActivity(intent)
+        }
+    }
+
+    private fun hasCallScreeningRole(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(Context.ROLE_SERVICE) as? RoleManager
+            return roleManager?.isRoleHeld(RoleManager.ROLE_CALL_SCREENING) == true
+        }
+        return false // Only supported on Q+
+    }
+
+    private fun requestCallScreeningRole() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(Context.ROLE_SERVICE) as RoleManager
+            if (!roleManager.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)) {
+                val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING)
+                startActivityForResult(intent, CALL_SCREENING_ROLE_REQUEST_CODE)
+            }
         }
     }
 
