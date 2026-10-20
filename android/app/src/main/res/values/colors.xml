@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cor de fundo Bege Creme para combinar com a UI da app -->
+    <color name="ic_launcher_background">#F0EAE1</color>
+    <color name="splash_background">#F0EAE1</color>
+</resources>
