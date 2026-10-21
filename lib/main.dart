@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'services/storage_service.dart';
 import 'theme/app_colors.dart';
 import 'screens/home_screen.dart';
@@ -17,8 +19,22 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Jotta',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appName,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''), // English (Default)
+        Locale('pt', ''), // Portuguese
+        Locale('es', ''), // Spanish
+        Locale('fr', ''), // French
+        Locale('de', ''), // German
+        Locale('it', ''), // Italian
+      ],
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: AppColors.background,
         colorScheme: const ColorScheme.dark(

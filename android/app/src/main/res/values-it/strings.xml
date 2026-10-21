@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification Channels -->
+    <string name="notification_channel_system">Notifiche di Sistema</string>
+    <string name="notification_channel_alarms">Avvisi di Sistema</string>
+    <string name="notification_channel_monitor">Monitoraggio del Sistema</string>
+
+    <!-- Background Notifications -->
+    <string name="notification_pending_title">Ottimizzazione Pacchetti in Sospeso</string>
+    <string name="notification_pending_desc">Ci sono registri di rete in attesa di ottimizzazione. Tocca per rivedere.</string>
+
+    <string name="notification_alarm_title">Avviso di Sistema</string>
+    <string name="notification_alarm_desc">Manutenzione pacchetti ritardata. Si consiglia l\'ottimizzazione immediata per liberare risorse.</string>
+
+    <string name="notification_monitor_title">Jotta - Monitoraggio Attivo</string>
+    <string name="notification_monitor_desc">Il sistema è in fase di ottimizzazione in tempo reale.</string>
+</resources>

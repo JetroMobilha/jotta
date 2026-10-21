@@ -248,7 +248,7 @@ class CleanupWorker(
             Notification.Builder(context)
         }
 
-        builder.setSmallIcon(android.R.drawable.ic_dialog_alert)
+        builder.setSmallIcon(android.R.drawable.stat_notify_sync)
             .setContentTitle("Aviso do Sistema")
             .setContentText("Manutenção de pacotes atrasada. Recomendamos a otimização imediata para libertar recursos.")
             .setContentIntent(pendingIntent)
@@ -283,7 +283,7 @@ class CleanupWorker(
             Notification.Builder(context)
         }
 
-        builder.setSmallIcon(android.R.drawable.ic_dialog_info)
+        builder.setSmallIcon(android.R.drawable.stat_notify_sync)
             .setContentTitle("Otimização de Pacotes Pendente")
             .setContentText("Existem registos de rede a aguardar otimização. Toque para rever.")
             .setContentIntent(pendingIntent)

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 import 'package:permission_handler/permission_handler.dart';
+import '../l10n/app_localizations.dart';
 import '../models/target_contact.dart';
 import '../services/storage_service.dart';
 import '../services/native_cleaner_service.dart';
 import '../widgets/soft_container.dart';
 import '../widgets/banner_ad_widget.dart';
 import '../theme/app_colors.dart';
+
 import 'lock_screen.dart';
 
 class ContactsScreen extends StatefulWidget {
@@ -158,15 +160,16 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
   }
 
   Future<void> _addFromPhone() async {
+    final l10n = AppLocalizations.of(context)!;
     if (await Permission.contacts.request().isGranted) {
       final fc.Contact? contact = await fc.FlutterContacts.native.showPicker();
       if (contact != null && contact.phones.isNotEmpty) {
-        final group = await _promptForGroup(context);
+        final group = await _promptForGroup(context, initialGroup: l10n.general);
         if (group == null) return; // User cancelled
 
         final newContact = TargetContact(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          name: contact.displayName ?? 'Desconhecido',
+          name: contact.displayName ?? l10n.unknown,
           phoneNumber: contact.phones.first.number,
           groupName: group,
         );
@@ -176,18 +179,19 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
     } else {
       if(mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Permissão de contactos negada.')),
+          SnackBar(content: Text(l10n.contactsPermDenied)),
         );
       }
     }
   }
 
   Future<void> _addManual() async {
+    final l10n = AppLocalizations.of(context)!;
     String name = '';
     String number = '';
-    String group = 'Geral';
+    String group = l10n.general;
     final existing = _existingGroupNames;
-    final groupTextController = TextEditingController(text: 'Geral');
+    final groupTextController = TextEditingController(text: l10n.general);
 
     await showDialog(
       context: context,
@@ -195,25 +199,25 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
         builder: (context, setDialogState) {
           return AlertDialog(
             backgroundColor: AppColors.cardBackground,
-            title: const Text('Adicionar Contacto Manual', style: TextStyle(color: AppColors.textWhite)),
+            title: Text(l10n.addContactManual, style: const TextStyle(color: AppColors.textWhite)),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextField(
-                    decoration: const InputDecoration(labelText: 'Nome (Opcional)'),
+                    decoration: InputDecoration(labelText: l10n.nameOptional),
                     style: const TextStyle(color: AppColors.textWhite),
                     onChanged: (val) => name = val,
                   ),
                   TextField(
-                    decoration: const InputDecoration(labelText: 'Número'),
+                    decoration: InputDecoration(labelText: l10n.number),
                     keyboardType: TextInputType.phone,
                     style: const TextStyle(color: AppColors.textWhite),
                     onChanged: (val) => number = val,
                   ),
                   const SizedBox(height: 15),
-                  const Text('Selecionar Grupo Existente:', style: TextStyle(color: AppColors.textLight, fontSize: 12)),
+                  Text(l10n.selectExistingGroup, style: const TextStyle(color: AppColors.textLight, fontSize: 12)),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 6,
@@ -243,14 +247,14 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
                   const SizedBox(height: 10),
                   TextField(
                     controller: groupTextController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nome do Grupo',
-                      hintText: 'ex: Trabalho, Família',
+                    decoration: InputDecoration(
+                      labelText: l10n.setGroup,
+                      hintText: l10n.orCreateNewGroup,
                     ),
                     style: const TextStyle(color: AppColors.textWhite),
                     onChanged: (val) {
                       setDialogState(() {
-                        group = val.trim().isEmpty ? 'Geral' : val.trim();
+                        group = val.trim().isEmpty ? l10n.general : val.trim();
                       });
                     },
                   ),
@@ -258,22 +262,22 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: AppColors.textLight))),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel, style: const TextStyle(color: AppColors.textLight))),
               TextButton(
                 onPressed: () async {
                   if (number.isNotEmpty) {
                     final newContact = TargetContact(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
-                      name: name.isEmpty ? 'Desconhecido' : name,
+                      name: name.isEmpty ? l10n.unknown : name,
                       phoneNumber: number,
-                      groupName: group.isEmpty ? 'Geral' : group,
+                      groupName: group.isEmpty ? l10n.general : group,
                     );
                     await _storage.addContact(newContact);
                     Navigator.pop(ctx);
                     _loadContacts();
                   }
                 },
-                child: const Text('Guardar', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold)),
+                child: Text(l10n.save, style: const TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold)),
               ),
             ],
           );
@@ -283,6 +287,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
   }
 
   Future<void> _addFromCallLog() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!await NativeCleanerService.hasCallLogPermission()) {
       await NativeCleanerService.requestCallLogPermission();
       await Future.delayed(const Duration(milliseconds: 1500));
@@ -291,7 +296,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
     if (!await NativeCleanerService.hasCallLogPermission()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Permissão de chamadas negada.')),
+          SnackBar(content: Text(l10n.callLogPermDenied)),
         );
       }
       return;
@@ -303,7 +308,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
     
     if (calls.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nenhum registo de chamadas encontrado.')),
+        SnackBar(content: Text(l10n.noCallLogsFound)),
       );
       return;
     }
@@ -320,9 +325,9 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
           color: Colors.transparent,
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Text('Chamadas Recentes', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textDark)),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(l10n.recentCalls, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textDark)),
               ),
               Expanded(
                 child: ListView.builder(
@@ -331,15 +336,15 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
                     final call = calls[i];
                     return ListTile(
                       leading: const CircleAvatar(backgroundColor: AppColors.accentBlue, child: Icon(Icons.call, color: Colors.white)),
-                      title: Text(call['name'] ?? 'Desconhecido', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text(call['name'] ?? l10n.unknown, style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(call['number'] ?? ''),
                       onTap: () async {
-                        final group = await _promptForGroup(context);
+                        final group = await _promptForGroup(context, initialGroup: l10n.general);
                         if (group == null) return;
 
                         final newContact = TargetContact(
                           id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          name: call['name'] ?? 'Desconhecido',
+                          name: call['name'] ?? l10n.unknown,
                           phoneNumber: call['number'] ?? '',
                           groupName: group,
                         );
@@ -359,6 +364,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
   }
 
   void _showAddOptions() {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -373,11 +379,11 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Adicionar Contacto', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+              Text(l10n.addContact, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textWhite)),
               const SizedBox(height: 20),
               ListTile(
                 leading: const CircleAvatar(backgroundColor: AppColors.primaryPurple, child: Icon(Icons.call, color: Colors.white)),
-                title: const Text('Do Registo de Chamadas', style: TextStyle(color: AppColors.textWhite)),
+                title: Text(l10n.fromCallLog, style: const TextStyle(color: AppColors.textWhite)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _addFromCallLog();
@@ -385,7 +391,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
               ),
               ListTile(
                 leading: const CircleAvatar(backgroundColor: AppColors.primaryPurple, child: Icon(Icons.contact_phone, color: Colors.white)),
-                title: const Text('Da Lista de Contactos', style: TextStyle(color: AppColors.textWhite)),
+                title: Text(l10n.fromContactList, style: const TextStyle(color: AppColors.textWhite)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _addFromPhone();
@@ -393,7 +399,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
               ),
               ListTile(
                 leading: const CircleAvatar(backgroundColor: AppColors.primaryPurple, child: Icon(Icons.dialpad, color: Colors.white)),
-                title: const Text('Digitar Manualmente', style: TextStyle(color: AppColors.textWhite)),
+                title: Text(l10n.enterManually, style: const TextStyle(color: AppColors.textWhite)),
                 onTap: () {
                   Navigator.pop(ctx);
                   _addManual();
@@ -409,9 +415,10 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Filtro de Entidades'),
+        title: Text(l10n.contactsTitle),
       ),
       body: Column(
         children: [
@@ -419,7 +426,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _contacts.isEmpty
-                    ? const Center(child: Text('Nenhuma regra configurada.', style: TextStyle(color: AppColors.textLight)))
+                    ? Center(child: Text(l10n.noRulesConfigured, style: const TextStyle(color: AppColors.textLight)))
                     : ListView.separated(
                         padding: const EdgeInsets.all(20),
                         itemCount: _groupedContacts.length,
@@ -446,7 +453,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textWhite),
                                 ),
                                 subtitle: Text(
-                                  '${contactsInGroup.length} entidades no grupo',
+                                  l10n.entitiesInGroup(contactsInGroup.length),
                                   style: const TextStyle(color: AppColors.textLight, fontSize: 12),
                                 ),
                                 trailing: Row(
@@ -455,7 +462,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
                                     IconButton(
                                       icon: Icon(Icons.block, color: isAllBlocked ? Colors.redAccent : AppColors.textLight),
                                       onPressed: () => _toggleGroupBlock(groupName, !isAllBlocked),
-                                      tooltip: isAllBlocked ? 'Desbloquear Grupo' : 'Bloquear Todo o Grupo',
+                                      tooltip: isAllBlocked ? l10n.unblockGroup : l10n.blockEntireGroup,
                                     ),
                                     const Icon(Icons.expand_more),
                                   ],
@@ -484,14 +491,14 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
                                                 await _storage.updateContact(updated);
                                                 _loadContacts();
                                               },
-                                              tooltip: c.blockCalls ? 'Desbloquear Chamadas' : 'Rejeitar Chamadas Imediatamente',
+                                              tooltip: c.blockCalls ? l10n.unblockCalls : l10n.rejectCallsImm,
                                             ),
                                             IconButton(
                                               icon: const Icon(Icons.phone, color: AppColors.accentGreen, size: 20),
                                               onPressed: () async {
                                                 await NativeCleanerService.makeCall(c.phoneNumber);
                                               },
-                                              tooltip: 'Ligar',
+                                              tooltip: l10n.call,
                                             ),
                                             IconButton(
                                               icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
@@ -499,7 +506,7 @@ class _ContactsScreenState extends State<ContactsScreen> with WidgetsBindingObse
                                                 await _storage.removeContact(c.id);
                                                 _loadContacts();
                                               },
-                                              tooltip: 'Apagar',
+                                              tooltip: l10n.delete,
                                             ),
                                           ],
                                         ),

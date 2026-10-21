@@ -1,0 +1,166 @@
+{
+  "@@locale": "en",
+  "appName": "Jotta",
+  "appDescription": "System Optimizer",
+
+  "homeTitle": "Jotta",
+  "optimizationActive": "Optimization Active",
+  "optimizationInactive": "Optimization Inactive",
+  "pingsLabel": "Pings: ",
+  "packetsLabel": " | Packets: ",
+  "everyMins": "every {mins}m",
+  "@everyMins": {
+    "placeholders": {
+      "mins": { "type": "int" }
+    }
+  },
+  "everyHours": "every {hours}h",
+  "@everyHours": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "disabled": "Off",
+  "lastOptimization": "Last optimization:",
+  "never": "Never",
+  "tapToOptimize": "Tap to optimize now",
+  "optimizeBtn": "Optimize",
+
+  "vaultTitle": "Diagnostic Log",
+  "vaultSubtitle": "View maintenance history and cache",
+  "contactsTitle": "Entity Filter",
+  "contactsSubtitle": "{count} entities with active rules",
+  "@contactsSubtitle": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "scheduleTitle": "Maintenance Schedule",
+  "scheduleSubtitle": "Configure optimization routines",
+
+  "permissionRequired": "Permission Required",
+  "smsPermissionDesc": "To erase private messages, Jotta needs to be temporarily set as the default SMS app. After cleaning, your original app will be restored.",
+  "cancel": "Cancel",
+  "setAndClean": "Set & Clean",
+  "optimizingSystemLogs": "Optimizing system logs...",
+  "optimizationComplete": "Optimization completed successfully.",
+  "restoreSmsAppTitle": "Restore Messaging App",
+  "restoreSmsAppDesc": "Optimization finished. Do you want to reopen your original messaging app to set it as default again?",
+  "later": "Later",
+  "reopen": "Reopen",
+
+  "clearVaultTitle": "Clear Log?",
+  "clearVaultDesc": "Are you sure you want to permanently delete all logs? This action cannot be undone.",
+  "deleteGroupTitle": "Delete Group",
+  "deleteGroupDesc": "Are you sure you want to permanently delete all logs from {contactName} ({phoneNumber})?",
+  "@deleteGroupDesc": {
+    "placeholders": {
+      "contactName": { "type": "String" },
+      "phoneNumber": { "type": "String" }
+    }
+  },
+  "deleteAll": "Delete All",
+  "delete": "Delete",
+  "logIsClean": "The Log is clean.",
+  "logIsCleanDesc": "Logs and data of optimized entities will appear here for technical verification.",
+  "unknown": "Unknown",
+  "retainedLogs": "{count} retained logs",
+  "@retainedLogs": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "callLog": "Call Log",
+  "textPacket": "Text Packet",
+  "callBlockedSource": "Call Blocked at Source",
+
+  "noRulesConfigured": "No rules configured.",
+  "entitiesInGroup": "{count} entities in group",
+  "@entitiesInGroup": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "unblockGroup": "Unblock Group",
+  "blockEntireGroup": "Block Entire Group",
+  "unblockCalls": "Unblock Calls",
+  "rejectCallsImm": "Reject Calls Immediately",
+  "call": "Call",
+  "setGroup": "Set Group",
+  "groupNameHint": "Group Name (e.g., Work, Family)",
+  "ok": "OK",
+  "contactsPermDenied": "Contacts permission denied.",
+  "addContactManual": "Add Contact Manually",
+  "nameOptional": "Name (Optional)",
+  "number": "Number",
+  "selectExistingGroup": "Select Existing Group:",
+  "orCreateNewGroup": "Or create a new group",
+  "save": "Save",
+  "callLogPermDenied": "Call log permission denied.",
+  "noCallLogsFound": "No call logs found.",
+  "recentCalls": "Recent Calls",
+  "addContact": "Add Contact",
+  "fromCallLog": "From Call Log",
+  "fromContactList": "From Contact List",
+  "enterManually": "Enter Manually",
+  "general": "General",
+
+  "pingOptTitle": "Ping Optimization (Calls)",
+  "pingOptDesc": "Silent and continuous",
+  "packetOptTitle": "Packet Optimization (SMS)",
+  "packetOptDesc": "Secure (requires notification)",
+  "everyTime": "Every {time}",
+  "@everyTime": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "delayAlerts": "Delay Alerts",
+  "delayAlertsDesc": "Emits sound if not cleaned after 30m",
+  "diagnosticRetention": "Diagnostic Retention",
+  "doNotSave": "Do Not Save (Delete directly)",
+  "oneDay": "1 Day",
+  "sevenDays": "7 Days (Recommended)",
+  "thirtyDays": "30 Days",
+  "systemResilience": "System Resilience",
+  "survivalMode": "Survival Mode",
+  "survivalModeDesc": "Prevents app closure by displaying a continuous protection notification on screen.",
+
+  "permissions": "Permissions",
+  "permissionsDesc": "For Jotta to automatically delete information, you must grant the following accesses:",
+  "callLogPerm": "Call Log",
+  "callLogPermDesc": "Required to optimize network pings.",
+  "accessGranted": "Access Granted",
+  "grant": "Grant",
+  "contactsPerm": "Contacts",
+  "contactsPermDesc": "Add numbers from list.",
+  "smsManagement": "SMS Management",
+  "defaultSet": "Default Set",
+  "smsManagementDesc": "Permission for packet optimization.",
+  "set": "Set",
+  "notificationsPerm": "Notifications",
+  "notificationsPermDesc": "Alerts for packet optimization.",
+  "interceptFilter": "Interception Filter",
+  "shieldActive": "Shield Active",
+  "interceptFilterDesc": "Reject unwanted calls.",
+  "activate": "Activate",
+  "continuousExecution": "Continuous Execution",
+  "exemptionGranted": "Exemption Granted",
+  "continuousExecutionDesc": "Ignore battery limits to prevent sleeping.",
+  "exempt": "Exempt",
+  "smsNote": "SMS Note: You will continue to receive normal message notifications. You can revert this setting in your phone settings at any time.",
+
+  "healthCenterTitle": "System Health Center",
+  "healthCenterDesc": "If automatic cleaning isn't working in the background, check the options below to prevent Android from freezing the app.",
+  "autoStartTitle": "1. Auto-Start",
+  "autoStartDesc": "Manufacturers like Xiaomi, Oppo, and Vivo block auto-start for security. You must enable this permission.",
+  "openAutoStartSettings": "Open Auto-Start Settings",
+  "batteryRestrictionsTitle": "2. Battery Restrictions",
+  "batteryRestrictionsDesc": "Android 'sleeps' apps to save battery (Deep Doze). Ensure exemption is active.",
+  "ignoreBatteryLimits": "Ignore Battery Limits",
+  "exemptionActive": "Exemption Active!",
+  "permRevocationTitle": "3. Permission Revocation",
+  "permRevocationDesc": "On Android 11+, the system removes permissions from 'unused' apps. Go to Jotta's standard settings and disable 'Remove permissions if app is unused'.",
+  "forceStopTitle": "4. The Danger of 'Force Stop'",
+  "forceStopDesc": "Swiping the app closed in recent windows is perfectly safe. However, going to settings and clicking 'Force Stop' permanently kills the background engine until you click the Jotta icon again to resurrect it."
+}

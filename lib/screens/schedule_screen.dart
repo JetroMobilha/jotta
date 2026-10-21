@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../models/schedule_config.dart';
 import '../services/storage_service.dart';
 import '../services/native_cleaner_service.dart';
 import '../widgets/soft_container.dart';
 import '../widgets/banner_ad_widget.dart';
 import '../theme/app_colors.dart';
+
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});
@@ -46,19 +48,26 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     } else {
       await NativeCleanerService.cancelBackgroundCleanup();
     }
+
+    if (newConfig.extremeModeEnabled) {
+      await NativeCleanerService.startMonitorService();
+    } else {
+      await NativeCleanerService.stopMonitorService();
+    }
   }
 
-  String _formatInterval(int minutes) {
-    if (minutes < 60) return '$minutes minutos';
-    if (minutes == 60) return '1 hora';
-    if (minutes < 1440) return '${minutes ~/ 60} horas';
-    return '1 dia';
+  String _formatInterval(int minutes, AppLocalizations l10n) {
+    if (minutes < 60) return '$minutes m';
+    if (minutes == 60) return '1 h';
+    if (minutes < 1440) return '${minutes ~/ 60} h';
+    return l10n.oneDay;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Agendamento')),
+      appBar: AppBar(title: Text(l10n.scheduleTitle)),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : ListView(
@@ -68,8 +77,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 child: SwitchListTile(
                   activeColor: AppColors.primaryPurple,
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Otimização de Pings (Chamadas)', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                  subtitle: const Text('Silencioso e contínuo', style: TextStyle(color: AppColors.textLight)),
+                  title: Text(l10n.pingOptTitle, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                  subtitle: Text(l10n.pingOptDesc, style: const TextStyle(color: AppColors.textLight)),
                   value: _config.callLogEnabled,
                   onChanged: (val) {
                     _updateConfig(_config.copyWith(callLogEnabled: val));
@@ -83,7 +92,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   child: Column(
                     children: [15, 30, 60].map((interval) => RadioListTile<int>(
                       activeColor: AppColors.primaryPurple,
-                      title: Text('A cada ${_formatInterval(interval)}', style: const TextStyle(color: AppColors.textWhite)),
+                      title: Text(l10n.everyTime(_formatInterval(interval, l10n)), style: const TextStyle(color: AppColors.textWhite)),
                       value: interval,
                       groupValue: _config.callLogIntervalMinutes,
                       onChanged: (val) {
@@ -98,8 +107,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 child: SwitchListTile(
                   activeColor: AppColors.primaryPurple,
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Otimização de Pacotes (SMS)', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                  subtitle: const Text('Seguro (requer notificação)', style: TextStyle(color: AppColors.textLight)),
+                  title: Text(l10n.packetOptTitle, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                  subtitle: Text(l10n.packetOptDesc, style: const TextStyle(color: AppColors.textLight)),
                   value: _config.smsEnabled,
                   onChanged: (val) {
                     _updateConfig(_config.copyWith(smsEnabled: val));
@@ -113,7 +122,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   child: Column(
                     children: [15, 30, 60, 120, 360, 720, 1440].map((interval) => RadioListTile<int>(
                       activeColor: AppColors.primaryPurple,
-                      title: Text('A cada ${_formatInterval(interval)}', style: const TextStyle(color: AppColors.textWhite)),
+                      title: Text(l10n.everyTime(_formatInterval(interval, l10n)), style: const TextStyle(color: AppColors.textWhite)),
                       value: interval,
                       groupValue: _config.smsIntervalMinutes,
                       onChanged: (val) {
@@ -127,8 +136,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   child: SwitchListTile(
                     activeColor: AppColors.primaryPurple,
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Alertas de Atraso', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-                    subtitle: const Text('Emite som se não limpar ao fim de 30m', style: TextStyle(color: AppColors.textLight)),
+                    title: Text(l10n.delayAlerts, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                    subtitle: Text(l10n.delayAlertsDesc, style: const TextStyle(color: AppColors.textLight)),
                     value: _config.smsReminderEnabled,
                     onChanged: (val) {
                       _updateConfig(_config.copyWith(smsReminderEnabled: val));
@@ -137,9 +146,26 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 ),
               ],
               const SizedBox(height: 30),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 15.0),
-                child: Text('Retenção de Diagnóstico', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textWhite)),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: Text(l10n.systemResilience, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textWhite)),
+              ),
+              SoftContainer(
+                child: SwitchListTile(
+                  activeColor: Colors.redAccent,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.survivalMode, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+                  subtitle: Text(l10n.survivalModeDesc, style: const TextStyle(color: AppColors.textLight)),
+                  value: _config.extremeModeEnabled,
+                  onChanged: (val) {
+                    _updateConfig(_config.copyWith(extremeModeEnabled: val));
+                  },
+                ),
+              ),
+              const SizedBox(height: 30),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15.0),
+                child: Text(l10n.diagnosticRetention, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textWhite)),
               ),
               SoftContainer(
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -147,7 +173,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   children: [
                     RadioListTile<int>(
                       activeColor: AppColors.primaryPurple,
-                      title: const Text('Não Guardar (Eliminar direto)', style: TextStyle(color: AppColors.textWhite)),
+                      title: Text(l10n.doNotSave, style: const TextStyle(color: AppColors.textWhite)),
                       value: 0,
                       groupValue: _config.vaultRetentionDays,
                       onChanged: (val) {
@@ -156,7 +182,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     ),
                     RadioListTile<int>(
                       activeColor: AppColors.primaryPurple,
-                      title: const Text('1 Dia', style: TextStyle(color: AppColors.textWhite)),
+                      title: Text(l10n.oneDay, style: const TextStyle(color: AppColors.textWhite)),
                       value: 1,
                       groupValue: _config.vaultRetentionDays,
                       onChanged: (val) {
@@ -165,7 +191,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     ),
                     RadioListTile<int>(
                       activeColor: AppColors.primaryPurple,
-                      title: const Text('7 Dias (Recomendado)', style: TextStyle(color: AppColors.textWhite)),
+                      title: Text(l10n.sevenDays, style: const TextStyle(color: AppColors.textWhite)),
                       value: 7,
                       groupValue: _config.vaultRetentionDays,
                       onChanged: (val) {
@@ -174,7 +200,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     ),
                     RadioListTile<int>(
                       activeColor: AppColors.primaryPurple,
-                      title: const Text('30 Dias', style: TextStyle(color: AppColors.textWhite)),
+                      title: Text(l10n.thirtyDays, style: const TextStyle(color: AppColors.textWhite)),
                       value: 30,
                       groupValue: _config.vaultRetentionDays,
                       onChanged: (val) {

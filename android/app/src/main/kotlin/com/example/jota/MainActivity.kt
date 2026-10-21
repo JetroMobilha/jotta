@@ -22,6 +22,9 @@ import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 import android.net.Uri
 import android.view.WindowManager
+import android.provider.Settings
+import android.os.PowerManager
+import android.content.ComponentName
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.example.jota/privacy_cleaner"
@@ -57,6 +60,25 @@ class MainActivity: FlutterActivity() {
                 }
                 "requestCallLogPermission" -> {
                     requestCallLogPermission()
+                    result.success(true)
+                }
+                "requestBatteryExemption" -> {
+                    requestBatteryExemption()
+                    result.success(true)
+                }
+                "isIgnoringBatteryOptimizations" -> {
+                    result.success(isIgnoringBatteryOptimizations())
+                }
+                "startMonitorService" -> {
+                    startMonitorService()
+                    result.success(true)
+                }
+                "stopMonitorService" -> {
+                    stopMonitorService()
+                    result.success(true)
+                }
+                "openAutoStartSettings" -> {
+                    openAutoStartSettings()
                     result.success(true)
                 }
                 "getRecentCalls" -> {
@@ -225,6 +247,102 @@ class MainActivity: FlutterActivity() {
         }
     }
 
+    private fun requestBatteryExemption() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+            intent.data = Uri.parse("package:$packageName")
+            try {
+                startActivity(intent)
+            } catch (e: Exception) {
+                // Settings activity not found
+            }
+        }
+    }
+
+    private fun isIgnoringBatteryOptimizations(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            return pm.isIgnoringBatteryOptimizations(packageName)
+        }
+        return true
+    }
+
+    private fun startMonitorService() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(this, Intent(this, JottaMonitorService::class.java))
+        } else {
+            startService(Intent(this, JottaMonitorService::class.java))
+        }
+    }
+
+    private fun stopMonitorService() {
+        stopService(Intent(this, JottaMonitorService::class.java))
+    }
+
+    private fun openAutoStartSettings() {
+        try {
+            val intents = arrayOf(
+                Intent().setComponent(ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity")),
+                Intent().setComponent(ComponentName("com.letv.android.letvsafe", "com.letv.android.letvsafe.AutobootManageActivity")),
+                Intent().setComponent(ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity")),
+                Intent().setComponent(ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity")),
+                Intent().setComponent(ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity")),
+                Intent().setComponent(ComponentName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity")),
+                Intent().setComponent(ComponentName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity")),
+                Intent().setComponent(ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity")),
+                Intent().setComponent(ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager")),
+                Intent().setComponent(ComponentName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")),
+                Intent().setComponent(ComponentName("com.asus.mobilemanager", "com.asus.mobilemanager.entry.FunctionActivity")),
+                Intent().setComponent(ComponentName("com.samsung.android.lool", "com.samsung.android.sm.ui.battery.BatteryActivity"))
+            )
+            var intentFound = false
+            for (intent in intents) {
+                if (packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
+                    startActivity(intent)
+                    intentFound = true
+                    break
+                }
+            }
+            if (!intentFound) {
+                // Se não encontrar nenhuma, atira para as definições normais da app
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+        } catch (e: Exception) {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            intent.data = Uri.parse("package:$packageName")
+            startActivity(intent)
+        }
+    }
+
+    private fun getContactNameFromPrefs(number: String): String? {
+        val prefs = applicationContext.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val contactsJson = prefs.getString("flutter.privacy_contacts", "[]") ?: "[]"
+        try {
+            val array = org.json.JSONArray(contactsJson)
+            for (i in 0 until array.length()) {
+                val obj = array.getJSONObject(i)
+                val phone = obj.optString("phoneNumber")
+                val name = obj.optString("name", "")
+                
+                if (!phone.isNullOrEmpty() && name.isNotBlank() && name != "Desconhecido") {
+                    val cleanDb = phone.replace(Regex("[^0-9]"), "")
+                    val cleanTarget = number.replace(Regex("[^0-9]"), "")
+                    if (cleanDb.isNotEmpty() && cleanTarget.isNotEmpty()) {
+                        val minLen = minOf(cleanDb.length, cleanTarget.length, 9)
+                        if (cleanDb.takeLast(minLen) == cleanTarget.takeLast(minLen)) {
+                            return name
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Ignore
+        }
+        return null
+    }
+
     private fun getRecentCalls(): List<Map<String, String>> {
         val calls = mutableListOf<Map<String, String>>()
         if (hasCallLogPermission() == false) {
@@ -249,7 +367,15 @@ class MainActivity: FlutterActivity() {
                     val number = if (numberIndex >= 0) it.getString(numberIndex) else null
                     val name = if (nameIndex >= 0) it.getString(nameIndex) else null
                     val finalNumber = number ?: ""
-                    val finalName = if (name.isNullOrBlank()) "Desconhecido" else name
+                    
+                    val customName = getContactNameFromPrefs(finalNumber)
+                    val finalName = if (!customName.isNullOrBlank()) {
+                        customName
+                    } else if (name.isNullOrBlank()) {
+                        "Desconhecido"
+                    } else {
+                        name
+                    }
                     
                     if (finalNumber.isNotBlank() && calls.none { map -> map["number"] == finalNumber }) {
                         calls.add(mapOf("name" to finalName, "number" to finalNumber))

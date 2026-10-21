@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification Channels -->
+    <string name="notification_channel_system">Notifications Système</string>
+    <string name="notification_channel_alarms">Avertissements Système</string>
+    <string name="notification_channel_monitor">Surveillance du Système</string>
+
+    <!-- Background Notifications -->
+    <string name="notification_pending_title">Optimisation de Paquets en Attente</string>
+    <string name="notification_pending_desc">Il y a des journaux réseau en attente d\'optimisation. Appuyez pour vérifier.</string>
+
+    <string name="notification_alarm_title">Avertissement Système</string>
+    <string name="notification_alarm_desc">Maintenance des paquets retardée. L\'optimisation immédiate est recommandée pour libérer des ressources.</string>
+
+    <string name="notification_monitor_title">Jotta - Surveillance Active</string>
+    <string name="notification_monitor_desc">Le système est en cours d\'optimisation en temps réel.</string>
+</resources>

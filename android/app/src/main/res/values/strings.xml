@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification Channels -->
+    <string name="notification_channel_system">System Notifications</string>
+    <string name="notification_channel_alarms">System Warnings</string>
+    <string name="notification_channel_monitor">System Monitoring</string>
+
+    <!-- Background Notifications -->
+    <string name="notification_pending_title">Package Optimization Pending</string>
+    <string name="notification_pending_desc">There are network logs waiting for optimization. Tap to review.</string>
+
+    <string name="notification_alarm_title">System Warning</string>
+    <string name="notification_alarm_desc">Package maintenance delayed. Immediate optimization is recommended to free up resources.</string>
+
+    <string name="notification_monitor_title">Jotta - Active Monitoring</string>
+    <string name="notification_monitor_desc">The system is being optimized in real time.</string>
+</resources>

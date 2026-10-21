@@ -14,6 +14,8 @@ import 'vault_screen.dart';
 import 'lock_screen.dart';
 import 'onboarding_screen.dart';
 import 'status_screen.dart';
+import 'health_screen.dart';
+import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -73,11 +75,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: AppColors.background,
-          title: const Text('Permissão Necessária'),
-          content: const Text('Para apagar as mensagens privadas, o Jotta precisa ser definido temporariamente como a app de SMS padrão. Depois da limpeza, a sua aplicação original será reaberta para restaurar.'),
+          title: Text(AppLocalizations.of(context)!.permissionRequired),
+          content: Text(AppLocalizations.of(context)!.smsPermissionDesc),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-            TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Definir e Limpar', style: TextStyle(fontWeight: FontWeight.bold))),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.cancel)),
+            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(AppLocalizations.of(context)!.setAndClean, style: const TextStyle(fontWeight: FontWeight.bold))),
           ],
         ),
       );
@@ -104,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   Future<void> _executeClean(String? prevApp) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('A otimizar registos do sistema...')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.optimizingSystemLogs)),
     );
 
     // 1. Show the ad to the user instantly (so it acts as a "Loading Screen")
@@ -115,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Otimização concluída com sucesso.')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.optimizationComplete)),
           );
 
           if (prevApp != null && prevApp != 'com.example.jota') {
@@ -123,11 +125,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               context: context,
               builder: (ctx) => AlertDialog(
                 backgroundColor: AppColors.cardBackground,
-                title: const Text('Restaurar App de Mensagens', style: TextStyle(color: AppColors.textWhite)),
-                content: const Text('A otimização terminou. Deseja reabrir a sua aplicação de mensagens original para a definir novamente como padrão?', style: TextStyle(color: AppColors.textLight)),
+                title: Text(AppLocalizations.of(context)!.restoreSmsAppTitle, style: const TextStyle(color: AppColors.textWhite)),
+                content: Text(AppLocalizations.of(context)!.restoreSmsAppDesc, style: const TextStyle(color: AppColors.textLight)),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Mais Tarde', style: TextStyle(color: AppColors.textLight))),
-                  TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Reabrir', style: TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold))),
+                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(AppLocalizations.of(context)!.later, style: const TextStyle(color: AppColors.textLight))),
+                  TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(AppLocalizations.of(context)!.reopen, style: const TextStyle(color: AppColors.primaryPurple, fontWeight: FontWeight.bold))),
                 ],
               ),
             );
@@ -157,14 +159,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Jotta', style: TextStyle(letterSpacing: 1.2)),
+        title: Text(l10n.homeTitle, style: const TextStyle(letterSpacing: 1.2)),
         actions: [
           IconButton(
             icon: const Icon(Icons.analytics_outlined),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const StatusScreen()));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.health_and_safety_outlined),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const HealthScreen()));
             },
           ),
           IconButton(
@@ -197,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   hasGlow: true,
                   backgroundColor: AppColors.primaryPurple,
                   onTap: _cleanNow,
-                  child: const Column(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
@@ -205,10 +214,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         size: 65,
                         color: Colors.white,
                       ),
-                      SizedBox(height: 6),
+                      const SizedBox(height: 6),
                       Text(
-                        'Otimizar',
-                        style: TextStyle(
+                        l10n.optimizeBtn,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -224,17 +233,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               onTap: () {
                 _requirePinThenNavigate(const VaultScreen());
               },
-              child: const Row(
+              child: Row(
                 children: [
-                  CircleAvatar(backgroundColor: AppColors.primaryPurple, child: Icon(Icons.inventory_2, color: Colors.white)),
-                  SizedBox(width: 15),
+                  const CircleAvatar(backgroundColor: AppColors.primaryPurple, child: Icon(Icons.inventory_2, color: Colors.white)),
+                  const SizedBox(width: 15),
                   Expanded(
                     child: Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('Registo de Diagnóstico', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textWhite)),
-                      Text('Ver histórico de manutenção e cache', style: TextStyle(color: AppColors.textLight)),
+                      Text(l10n.vaultTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textWhite)),
+                      Text(l10n.vaultSubtitle, style: const TextStyle(color: AppColors.textLight)),
                     ]),
                   ),
-                  Icon(Icons.arrow_forward_ios, color: AppColors.textLight, size: 16),
+                  const Icon(Icons.arrow_forward_ios, color: AppColors.textLight, size: 16),
                 ],
               ),
             ),
@@ -251,8 +260,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Filtro de Entidades', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textWhite)),
-                        Text('$_contactsCount entidades com regras ativas', style: const TextStyle(color: AppColors.textLight)),
+                        Text(l10n.contactsTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textWhite)),
+                        Text(l10n.contactsSubtitle(_contactsCount), style: const TextStyle(color: AppColors.textLight)),
                       ],
                     ),
                   ),
@@ -270,12 +279,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 children: [
                   const CircleAvatar(backgroundColor: AppColors.primaryPurple, child: Icon(Icons.schedule, color: Colors.white)),
                   const SizedBox(width: 15),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Agendamento de Manutenção', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textWhite)),
-                        Text('Configurar rotinas de otimização', style: TextStyle(color: AppColors.textLight)),
+                        Text(l10n.scheduleTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textWhite)),
+                        Text(l10n.scheduleSubtitle, style: const TextStyle(color: AppColors.textLight)),
                       ],
                     ),
                   ),

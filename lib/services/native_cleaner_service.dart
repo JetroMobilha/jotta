@@ -41,6 +41,39 @@ class NativeCleanerService {
     }
   }
 
+  static Future<bool> isIgnoringBatteryOptimizations() async {
+    try {
+      final result = await _channel.invokeMethod<bool>('isIgnoringBatteryOptimizations');
+      return result ?? true;
+    } on PlatformException catch (_) {
+      return true;
+    }
+  }
+
+  static Future<void> requestBatteryExemption() async {
+    try {
+      await _channel.invokeMethod('requestBatteryExemption');
+    } on PlatformException catch (_) {}
+  }
+
+  static Future<void> startMonitorService() async {
+    try {
+      await _channel.invokeMethod('startMonitorService');
+    } on PlatformException catch (_) {}
+  }
+
+  static Future<void> stopMonitorService() async {
+    try {
+      await _channel.invokeMethod('stopMonitorService');
+    } on PlatformException catch (_) {}
+  }
+
+  static Future<void> openAutoStartSettings() async {
+    try {
+      await _channel.invokeMethod('openAutoStartSettings');
+    } on PlatformException catch (_) {}
+  }
+
   static Future<void> requestCallLogPermission() async {
     try {
       await _channel.invokeMethod('requestCallLogPermission');

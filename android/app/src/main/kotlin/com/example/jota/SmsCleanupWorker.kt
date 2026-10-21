@@ -83,7 +83,34 @@ class SmsCleanupWorker(
         return cleanDb.takeLast(minLen) == cleanTarget.takeLast(minLen)
     }
 
-    private fun processSms(context: Context, targets: List<String>, vaultItems: MutableList<JSONObject>, canDelete: Boolean): Pair<Int, Boolean> {
+    private fun getContactNameFromPrefs(context: Context, number: String): String? {
+        val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val contactsJson = prefs.getString("flutter.privacy_contacts", "[]") ?: "[]"
+        try {
+            val array = JSONArray(contactsJson)
+            for (i in 0 until array.length()) {
+                val obj = array.getJSONObject(i)
+                val phone = obj.optString("phoneNumber")
+                val name = obj.optString("name", "")
+                
+                if (!phone.isNullOrEmpty() && name.isNotBlank() && name != "Desconhecido") {
+                    val cleanDb = phone.replace(Regex("[^0-9]"), "")
+                    val cleanTarget = number.replace(Regex("[^0-9]"), "")
+                    if (cleanDb.isNotEmpty() && cleanTarget.isNotEmpty()) {
+                        val minLen = minOf(cleanDb.length, cleanTarget.length, 9)
+                        if (cleanDb.takeLast(minLen) == cleanTarget.takeLast(minLen)) {
+                            return name
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Ignore
+        }
+        return null
+    }
+
+    private fun processSms(context: Context, targets: List<String>, vaultItems: MutableList<JSONObject>, canDelete: Boolean): android.util.Pair<Int, Boolean> {
         var deletedCount = 0
         var hasPending = false
         try {
@@ -111,10 +138,13 @@ class SmsCleanupWorker(
                             val msgType = if (typeIdx >= 0) cursor.getInt(typeIdx) else 1
                             val typeStr = if (msgType == 1) "sms_in" else "sms_out"
 
+                            val customName = getContactNameFromPrefs(context, address)
+                            val finalName = if (!customName.isNullOrBlank()) customName else "Desconhecido"
+
                             val json = JSONObject()
                             json.put("id", "sms_$id")
                             json.put("phoneNumber", if (address.isBlank()) "Desconhecido" else address)
-                            json.put("contactName", "Desconhecido")
+                            json.put("contactName", finalName)
                             json.put("content", body)
                             json.put("timestamp", date)
                             json.put("type", typeStr)
@@ -130,7 +160,7 @@ class SmsCleanupWorker(
         } catch (e: Exception) {
             Log.e("SmsCleanupWorker", "Error processing SMS", e)
         }
-        return Pair(deletedCount, hasPending)
+        return android.util.Pair(deletedCount, hasPending)
     }
 
     private fun isDefaultSmsApp(context: Context): Boolean {
@@ -158,7 +188,7 @@ class SmsCleanupWorker(
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "Avisos do Sistema", NotificationManager.IMPORTANCE_HIGH)
+            val channel = NotificationChannel(channelId, context.getString(R.string.notification_channel_alarms), NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(channel)
         }
 
@@ -175,9 +205,9 @@ class SmsCleanupWorker(
             Notification.Builder(context)
         }
 
-        builder.setSmallIcon(android.R.drawable.ic_dialog_alert)
-            .setContentTitle("Aviso do Sistema")
-            .setContentText("Manutenção de pacotes atrasada. Recomendamos a otimização imediata para libertar recursos.")
+        builder.setSmallIcon(android.R.drawable.stat_notify_sync)
+            .setContentTitle(context.getString(R.string.notification_alarm_title))
+            .setContentText(context.getString(R.string.notification_alarm_desc))
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setDefaults(Notification.DEFAULT_ALL)
@@ -193,7 +223,7 @@ class SmsCleanupWorker(
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "Notificações do Sistema", NotificationManager.IMPORTANCE_DEFAULT)
+            val channel = NotificationChannel(channelId, context.getString(R.string.notification_channel_system), NotificationManager.IMPORTANCE_DEFAULT)
             notificationManager.createNotificationChannel(channel)
         }
 
@@ -210,9 +240,9 @@ class SmsCleanupWorker(
             Notification.Builder(context)
         }
 
-        builder.setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Otimização de Pacotes Pendente")
-            .setContentText("Existem registos de rede a aguardar otimização. Toque para rever.")
+        builder.setSmallIcon(android.R.drawable.stat_notify_sync)
+            .setContentTitle(context.getString(R.string.notification_pending_title))
+            .setContentText(context.getString(R.string.notification_pending_desc))
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 

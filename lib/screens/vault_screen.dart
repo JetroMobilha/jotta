@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/app_localizations.dart';
 import '../models/vault_item.dart';
 import '../services/storage_service.dart';
 import '../services/native_cleaner_service.dart';
 import '../widgets/soft_container.dart';
 import '../widgets/banner_ad_widget.dart';
 import '../theme/app_colors.dart';
+
 import 'lock_screen.dart';
 
 class VaultScreen extends StatefulWidget {
@@ -66,15 +68,16 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _clearVault() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.background,
-        title: const Text('Limpar o Cofre?'),
-        content: const Text('Tem a certeza que deseja eliminar permanentemente todos os registos do cofre? Esta ação não pode ser desfeita.'),
+        backgroundColor: AppColors.cardBackground,
+        title: Text(l10n.clearVaultTitle, style: const TextStyle(color: AppColors.textWhite)),
+        content: Text(l10n.clearVaultDesc, style: const TextStyle(color: AppColors.textLight)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar', style: TextStyle(color: AppColors.textLight))),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Eliminar Tudo', style: TextStyle(color: Colors.redAccent))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel, style: const TextStyle(color: AppColors.textLight))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.deleteAll, style: const TextStyle(color: Colors.redAccent))),
         ],
       ),
     );
@@ -86,15 +89,16 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _deleteByPhone(String phoneNumber, String contactName) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.background,
-        title: const Text('Eliminar Grupo', style: TextStyle(color: AppColors.textWhite)),
-        content: Text('Tem a certeza que deseja eliminar permanentemente todos os registos de $contactName ($phoneNumber)?', style: const TextStyle(color: AppColors.textLight)),
+        backgroundColor: AppColors.cardBackground,
+        title: Text(l10n.deleteGroupTitle, style: const TextStyle(color: AppColors.textWhite)),
+        content: Text(l10n.deleteGroupDesc(contactName, phoneNumber), style: const TextStyle(color: AppColors.textLight)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar', style: TextStyle(color: AppColors.textLight))),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Eliminar', style: TextStyle(color: Colors.redAccent))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel, style: const TextStyle(color: AppColors.textLight))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.delete, style: const TextStyle(color: Colors.redAccent))),
         ],
       ),
     );
@@ -131,15 +135,16 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registo de Diagnóstico'),
+        title: Text(l10n.vaultTitle),
         actions: [
           if (_totalItems > 0)
             IconButton(
               icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
               onPressed: _clearVault,
-              tooltip: 'Limpar Todo o Registo',
+              tooltip: l10n.deleteAll,
             )
         ],
       ),
@@ -149,23 +154,23 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _groupedItems.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Padding(
-                          padding: EdgeInsets.all(30.0),
+                          padding: const EdgeInsets.all(30.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.inventory_2_outlined, size: 80, color: AppColors.textLight),
-                              SizedBox(height: 20),
+                              const Icon(Icons.inventory_2_outlined, size: 80, color: AppColors.textLight),
+                              const SizedBox(height: 20),
                               Text(
-                                'O Registo está limpo.',
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textWhite),
+                                l10n.logIsClean,
+                                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textWhite),
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               Text(
-                                'Os logs e dados das entidades otimizadas aparecerão aqui para verificação técnica.',
+                                l10n.logIsCleanDesc,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(color: AppColors.textLight, height: 1.5),
+                                style: const TextStyle(color: AppColors.textLight, height: 1.5),
                               ),
                             ],
                           ),
@@ -178,7 +183,7 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
                         itemBuilder: (ctx, i) {
                           final phoneNumber = _groupedItems.keys.elementAt(i);
                           final items = _groupedItems[phoneNumber]!;
-                          final recentItem = items.first; // Items already sorted by date descending
+                          final recentItem = items.first; 
                           final contactName = recentItem.contactName;
 
                           return SoftContainer(
@@ -194,12 +199,12 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
                                   child: Icon(_getIconForType(recentItem.type), color: Colors.white, size: 20),
                                 ),
                                 title: Text(
-                                  contactName != 'Desconhecido' ? contactName : phoneNumber,
+                                  contactName != 'Desconhecido' ? contactName : (contactName == 'Desconhecido' && phoneNumber.isEmpty ? l10n.unknown : phoneNumber),
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textWhite),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 subtitle: Text(
-                                  '${items.length} registos retidos',
+                                  l10n.retainedLogs(items.length),
                                   style: const TextStyle(color: AppColors.textLight, fontSize: 12),
                                 ),
                                 trailing: Row(
@@ -223,11 +228,11 @@ class _VaultScreenState extends State<VaultScreen> with WidgetsBindingObserver {
                                 ),
                                 children: items.map((item) {
                                   final isCall = item.type.contains('call');
-                                  String itemTitle = 'Pacote de Texto';
+                                  String itemTitle = l10n.textPacket;
                                   if (item.type == 'call_blocked') {
-                                    itemTitle = 'Chamada Bloqueada na Fonte';
+                                    itemTitle = l10n.callBlockedSource;
                                   } else if (isCall) {
-                                    itemTitle = 'Registo de Chamada';
+                                    itemTitle = l10n.callLog;
                                   }
 
                                   return Padding(

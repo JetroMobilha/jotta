@@ -77,11 +77,11 @@ class JotaCallScreeningService : CallScreeningService() {
             
             val array = JSONArray(vaultData)
             val json = JSONObject()
-            json.put("id", "blocked_${System.currentTimeMillis()}")
+            json.put("id", "blocked_${java.lang.System.currentTimeMillis()}")
             json.put("phoneNumber", number)
             json.put("contactName", if (contactName.isBlank()) "Desconhecido" else contactName)
             json.put("content", "Chamada Intercetada (Bloqueada)")
-            json.put("timestamp", System.currentTimeMillis())
+            json.put("timestamp", java.lang.System.currentTimeMillis())
             json.put("type", "call_blocked")
             
             array.put(json)

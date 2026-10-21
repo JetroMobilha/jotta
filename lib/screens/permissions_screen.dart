@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../l10n/app_localizations.dart';
 import '../services/native_cleaner_service.dart';
 import '../widgets/soft_container.dart';
 import '../widgets/banner_ad_widget.dart';
@@ -18,6 +20,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
   bool _isDefaultSms = false;
   bool _hasNotification = false;
   bool _hasCallScreening = false;
+  bool _isIgnoringBattery = true;
 
   @override
   void initState() {
@@ -31,6 +34,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     final isDefaultSms = await NativeCleanerService.isDefaultSmsApp();
     final hasNotif = await Permission.notification.isGranted;
     final hasCallScreen = await NativeCleanerService.hasCallScreeningRole();
+    final isIgnBattery = await NativeCleanerService.isIgnoringBatteryOptimizations();
 
     setState(() {
       _hasCallLog = hasCallLog;
@@ -38,27 +42,29 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
       _isDefaultSms = isDefaultSms;
       _hasNotification = hasNotif;
       _hasCallScreening = hasCallScreen;
+      _isIgnoringBattery = isIgnBattery;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Permissões')),
+      appBar: AppBar(title: Text(l10n.permissions)),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Text(
-            'Para que o Jotta consiga apagar as informações de forma automática, necessita de conceder os seguintes acessos:',
-            style: TextStyle(fontSize: 16, color: AppColors.textWhite, height: 1.4),
+          Text(
+            l10n.permissionsDesc,
+            style: const TextStyle(fontSize: 16, color: AppColors.textWhite, height: 1.4),
           ),
           const SizedBox(height: 25),
           SoftContainer(
             padding: const EdgeInsets.all(10),
             child: ListTile(
               leading: Icon(Icons.phone, color: _hasCallLog ? AppColors.accentGreen : Colors.redAccent),
-              title: const Text('Registo de Chamadas', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-              subtitle: Text(_hasCallLog ? 'Acesso Concedido' : 'Necessário para otimizar pings de rede.', style: const TextStyle(color: AppColors.textLight)),
+              title: Text(l10n.callLogPerm, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+              subtitle: Text(_hasCallLog ? l10n.accessGranted : l10n.callLogPermDesc, style: const TextStyle(color: AppColors.textLight)),
               trailing: _hasCallLog
                   ? const Icon(Icons.check_circle, color: AppColors.accentGreen, size: 28)
                   : ElevatedButton(
@@ -72,7 +78,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         await Future.delayed(const Duration(milliseconds: 1200));
                         _checkPermissions();
                       },
-                      child: const Text('Conceder', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text(l10n.grant, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
             ),
           ),
@@ -81,8 +87,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
             padding: const EdgeInsets.all(10),
             child: ListTile(
               leading: Icon(Icons.contacts, color: _hasContacts ? AppColors.accentGreen : Colors.redAccent),
-              title: const Text('Contactos', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-              subtitle: Text(_hasContacts ? 'Acesso Concedido' : 'Adicionar números da lista.', style: const TextStyle(color: AppColors.textLight)),
+              title: Text(l10n.contactsPerm, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+              subtitle: Text(_hasContacts ? l10n.accessGranted : l10n.contactsPermDesc, style: const TextStyle(color: AppColors.textLight)),
               trailing: _hasContacts
                   ? const Icon(Icons.check_circle, color: AppColors.accentGreen, size: 28)
                   : ElevatedButton(
@@ -95,7 +101,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         await Permission.contacts.request();
                         _checkPermissions();
                       },
-                      child: const Text('Conceder', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text(l10n.grant, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
             ),
           ),
@@ -104,8 +110,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
             padding: const EdgeInsets.all(10),
             child: ListTile(
               leading: Icon(Icons.sms, color: _isDefaultSms ? AppColors.accentGreen : Colors.redAccent),
-              title: const Text('Gestão de SMS', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-              subtitle: Text(_isDefaultSms ? 'Padrão Definido' : 'Permissão para otimização de pacotes.', style: const TextStyle(color: AppColors.textLight)),
+              title: Text(l10n.smsManagement, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+              subtitle: Text(_isDefaultSms ? l10n.defaultSet : l10n.smsManagementDesc, style: const TextStyle(color: AppColors.textLight)),
               trailing: _isDefaultSms
                   ? const Icon(Icons.check_circle, color: AppColors.accentGreen, size: 28)
                   : ElevatedButton(
@@ -118,7 +124,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         await NativeCleanerService.requestDefaultSmsApp();
                         Future.delayed(const Duration(seconds: 2), _checkPermissions);
                       },
-                      child: const Text('Definir', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text(l10n.set, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
             ),
           ),
@@ -127,8 +133,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
             padding: const EdgeInsets.all(10),
             child: ListTile(
               leading: Icon(Icons.notifications_active, color: _hasNotification ? AppColors.accentGreen : Colors.redAccent),
-              title: const Text('Notificações', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-              subtitle: Text(_hasNotification ? 'Acesso Concedido' : 'Alertas para otimização de pacotes.', style: const TextStyle(color: AppColors.textLight)),
+              title: Text(l10n.notificationsPerm, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+              subtitle: Text(_hasNotification ? l10n.accessGranted : l10n.notificationsPermDesc, style: const TextStyle(color: AppColors.textLight)),
               trailing: _hasNotification
                   ? const Icon(Icons.check_circle, color: AppColors.accentGreen, size: 28)
                   : ElevatedButton(
@@ -141,7 +147,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         await Permission.notification.request();
                         _checkPermissions();
                       },
-                      child: const Text('Conceder', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text(l10n.grant, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
             ),
           ),
@@ -150,8 +156,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
             padding: const EdgeInsets.all(10),
             child: ListTile(
               leading: Icon(Icons.block, color: _hasCallScreening ? AppColors.accentGreen : Colors.redAccent),
-              title: const Text('Filtro de Interceção', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
-              subtitle: Text(_hasCallScreening ? 'Escudo Ativo' : 'Rejeitar chamadas indesejadas.', style: const TextStyle(color: AppColors.textLight)),
+              title: Text(l10n.interceptFilter, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+              subtitle: Text(_hasCallScreening ? l10n.shieldActive : l10n.interceptFilterDesc, style: const TextStyle(color: AppColors.textLight)),
               trailing: _hasCallScreening
                   ? const Icon(Icons.check_circle, color: AppColors.accentGreen, size: 28)
                   : ElevatedButton(
@@ -165,16 +171,40 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                         await Future.delayed(const Duration(seconds: 2));
                         _checkPermissions();
                       },
-                      child: const Text('Ativar', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text(l10n.activate, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 15),
+          SoftContainer(
+            padding: const EdgeInsets.all(10),
+            child: ListTile(
+              leading: Icon(Icons.battery_charging_full, color: _isIgnoringBattery ? AppColors.accentGreen : Colors.redAccent),
+              title: Text(l10n.continuousExecution, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textWhite)),
+              subtitle: Text(_isIgnoringBattery ? l10n.exemptionGranted : l10n.continuousExecutionDesc, style: const TextStyle(color: AppColors.textLight)),
+              trailing: _isIgnoringBattery
+                  ? const Icon(Icons.check_circle, color: AppColors.accentGreen, size: 28)
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryPurple,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () async {
+                        await NativeCleanerService.requestBatteryExemption();
+                        await Future.delayed(const Duration(seconds: 2));
+                        _checkPermissions();
+                      },
+                      child: Text(l10n.exempt, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
             ),
           ),
           const SizedBox(height: 30),
-          const SoftContainer(
+          SoftContainer(
             backgroundColor: AppColors.cardBackground,
             child: Text(
-              'Nota sobre SMS: Continuará a receber notificações das mensagens normalmente. Pode reverter esta configuração nas definições do telemóvel a qualquer momento.',
-              style: TextStyle(color: AppColors.textWhite, height: 1.4),
+              l10n.smsNote,
+              style: const TextStyle(color: AppColors.textWhite, height: 1.4),
               textAlign: TextAlign.center,
             ),
           ),

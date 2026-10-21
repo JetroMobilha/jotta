@@ -54,6 +54,33 @@ class CallCleanupWorker(
         return cleanDb.takeLast(minLen) == cleanTarget.takeLast(minLen)
     }
 
+    private fun getContactNameFromPrefs(context: Context, number: String): String? {
+        val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val contactsJson = prefs.getString("flutter.privacy_contacts", "[]") ?: "[]"
+        try {
+            val array = JSONArray(contactsJson)
+            for (i in 0 until array.length()) {
+                val obj = array.getJSONObject(i)
+                val phone = obj.optString("phoneNumber")
+                val name = obj.optString("name", "")
+                
+                if (!phone.isNullOrEmpty() && name.isNotBlank() && name != "Desconhecido") {
+                    val cleanDb = phone.replace(Regex("[^0-9]"), "")
+                    val cleanTarget = number.replace(Regex("[^0-9]"), "")
+                    if (cleanDb.isNotEmpty() && cleanTarget.isNotEmpty()) {
+                        val minLen = minOf(cleanDb.length, cleanTarget.length, 9)
+                        if (cleanDb.takeLast(minLen) == cleanTarget.takeLast(minLen)) {
+                            return name
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Ignore
+        }
+        return null
+    }
+
     private fun processCallLog(context: Context, targets: List<String>, vaultItems: MutableList<JSONObject>): Int {
         var deletedCount = 0
         try {
@@ -74,7 +101,16 @@ class CallCleanupWorker(
                     if (targets.any { isNumberMatch(number, it) }) {
                         val id = if (idIdx >= 0) cursor.getString(idIdx) else ""
                         val name = if (nameIdx >= 0) cursor.getString(nameIdx) ?: "Desconhecido" else "Desconhecido"
-                        val finalName = if (name.isBlank() || name == "null") "Desconhecido" else name
+                        
+                        val customName = getContactNameFromPrefs(context, number)
+                        val finalName = if (!customName.isNullOrBlank()) {
+                            customName
+                        } else if (name.isBlank() || name == "null") {
+                            "Desconhecido"
+                        } else {
+                            name
+                        }
+                        
                         val date = if (dateIdx >= 0) cursor.getLong(dateIdx) else System.currentTimeMillis()
                         val callType = if (typeIdx >= 0) cursor.getInt(typeIdx) else 1
 

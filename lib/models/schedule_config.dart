@@ -4,6 +4,7 @@ class ScheduleConfig {
   final bool smsEnabled;
   final int smsIntervalMinutes;
   final bool smsReminderEnabled;
+  final bool extremeModeEnabled;
   final DateTime? lastExecution;
   final int vaultRetentionDays;
 
@@ -13,6 +14,7 @@ class ScheduleConfig {
     this.smsEnabled = false,
     this.smsIntervalMinutes = 1440, // 24 hours
     this.smsReminderEnabled = false,
+    this.extremeModeEnabled = false,
     this.lastExecution,
     this.vaultRetentionDays = 7,
   });
@@ -24,6 +26,7 @@ class ScheduleConfig {
       smsEnabled: json['smsEnabled'] as bool? ?? false,
       smsIntervalMinutes: json['smsIntervalMinutes'] as int? ?? 1440,
       smsReminderEnabled: json['smsReminderEnabled'] as bool? ?? false,
+      extremeModeEnabled: json['extremeModeEnabled'] as bool? ?? false,
       lastExecution: json['lastExecution'] != null
           ? DateTime.parse(json['lastExecution'] as String)
           : null,
@@ -38,6 +41,7 @@ class ScheduleConfig {
       'smsEnabled': smsEnabled,
       'smsIntervalMinutes': smsIntervalMinutes,
       'smsReminderEnabled': smsReminderEnabled,
+      'extremeModeEnabled': extremeModeEnabled,
       'lastExecution': lastExecution?.toIso8601String(),
       'vaultRetentionDays': vaultRetentionDays,
     };
@@ -49,6 +53,7 @@ class ScheduleConfig {
     bool? smsEnabled,
     int? smsIntervalMinutes,
     bool? smsReminderEnabled,
+    bool? extremeModeEnabled,
     DateTime? lastExecution,
     int? vaultRetentionDays,
   }) {
@@ -58,6 +63,7 @@ class ScheduleConfig {
       smsEnabled: smsEnabled ?? this.smsEnabled,
       smsIntervalMinutes: smsIntervalMinutes ?? this.smsIntervalMinutes,
       smsReminderEnabled: smsReminderEnabled ?? this.smsReminderEnabled,
+      extremeModeEnabled: extremeModeEnabled ?? this.extremeModeEnabled,
       lastExecution: lastExecution ?? this.lastExecution,
       vaultRetentionDays: vaultRetentionDays ?? this.vaultRetentionDays,
     );
